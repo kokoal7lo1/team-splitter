@@ -32,6 +32,16 @@ input, select, button {
   margin: 5px 0;
   padding: 5px;
   border-radius: 5px;
+  align-items: center;
+}
+
+.delete {
+  background: red;
+  color: white;
+  border: none;
+  cursor: pointer;
+  padding: 5px;
+  border-radius: 5px;
 }
 
 .teams {
@@ -100,12 +110,22 @@ function addPlayer() {
   displayPlayers();
 }
 
+function deletePlayer(index) {
+  players.splice(index, 1);
+  displayPlayers();
+}
+
 function displayPlayers() {
   let list = document.getElementById("players");
   list.innerHTML = "";
 
-  players.forEach(p => {
-    list.innerHTML += `<div class="player">${p.name} - ${p.rating}⭐</div>`;
+  players.forEach((p, index) => {
+    list.innerHTML += `
+      <div class="player">
+        ${p.name} - ${p.rating}⭐
+        <button class="delete" onclick="deletePlayer(${index})">❌</button>
+      </div>
+    `;
   });
 }
 
