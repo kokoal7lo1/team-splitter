@@ -40,7 +40,6 @@ button {
   padding: 10px;
   margin: 5px;
   border-radius: 5px;
-  align-items: center;
 }
 
 .player div {
@@ -56,10 +55,6 @@ button {
 .delete {
   background: red;
   color: white;
-}
-
-.teams {
-  margin-top: 15px;
 }
 </style>
 </head>
@@ -83,7 +78,7 @@ function save() {
 function showMenu() {
   document.getElementById("app").innerHTML = `
     <h2>⚽ كوكو للتقسيم</h2>
-    <button onclick="newGame()">تقسيمة جديدة</button>
+    <button onclick="newGame()">تقسيمة يديدة</button>
     <button onclick="showSaved()">تقسيماتك</button>
     <button onclick="settings()">الإعدادات</button>
   `;
@@ -154,38 +149,67 @@ function renderPlayers() {
   `).join("");
 }
 
+let lastTeams = null;
+
 function split(){
   let a=[],b=[],sa=0,sb=0;
-  let sorted=[...players].sort((x,y)=>y.rating-x.rating);
 
-  sorted.forEach(p=>{
+  let shuffled = [...players].sort(() => Math.random() - 0.5);
+
+  shuffled.forEach(p=>{
     if(sa<=sb){a.push(p);sa+=p.rating}
     else{b.push(p);sb+=p.rating}
   });
 
-  savedTeams.push({a,b});
-  save();
+  lastTeams = {a,b};
 
+  showResult();
+}
+
+function showResult(){
   document.getElementById("app").innerHTML = `
     <button onclick="showMenu()">⬅ رجوع</button>
+
     <h3>فريق A</h3>
-    ${a.map(x=>x.name).join("<br>")}
+    ${lastTeams.a.map(x=>x.name).join("<br>")}
+
     <h3>فريق B</h3>
-    ${b.map(x=>x.name).join("<br>")}
+    ${lastTeams.b.map(x=>x.name).join("<br>")}
+
+    <br>
+    <button onclick="saveTeams()">💾 حفظ</button>
+    <button onclick="split()">🔄 إعادة تقسيم</button>
   `;
 }
 
 function showSaved(){
   document.getElementById("app").innerHTML = `
     <button onclick="showMenu()">⬅ رجوع</button>
-    <h3>تقسيماتك</h3>
-    ${savedTeams.map((t,i)=>`
-      <div>
-        فريق A: ${t.a.map(x=>x.name).join(", ")}<br>
-        فريق B: ${t.b.map(x=>x.name).join(", ")}<br>
-        <button onclick="delTeam(${i})">❌ حذف</button>
-      </div><hr>
-    `).join("")}
+    <h3>📂 تقسيماتك</h3>
+
+    ${savedTeams.length === 0 ? 
+      "<p>ما عندك تقسيمات للحين 😅</p>" 
+      : 
+      savedTeams.map((t,i)=>`
+        <div class="saved-card">
+
+          <div class="saved-title">⚽ تقسيمة ${i+1}</div>
+
+          <div class="saved-team">
+            🔵 فريق A:<br>
+            ${t.a.map(x=>x.name).join("، ")}
+          </div>
+
+          <div class="saved-team">
+            🔴 فريق B:<br>
+            ${t.b.map(x=>x.name).join("، ")}
+          </div>
+
+          <button class="delete-btn" onclick="delTeam(${i})">❌ حذف التقسيمة</button>
+
+        </div>
+      `).join("")
+    }
   `;
 }
 
