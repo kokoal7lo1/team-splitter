@@ -195,10 +195,10 @@ function showResult(){
   document.getElementById("app").innerHTML = `
     <button onclick="showMenu()">⬅ رجوع</button>
 
-    <h3>🔵 فريق A (${lastTeams.sa})</h3>
+    <h3>🏟️ ملعب (${lastTeams.sa})</h3>
     ${lastTeams.a.map(x=>`${x.name} (${"⭐".repeat(x.rating)})`).join("<br>")}
 
-    <h3>🔴 فريق B (${lastTeams.sb})</h3>
+    <h3>⚽ كره (${lastTeams.sb})</h3>
     ${lastTeams.b.map(x=>`${x.name} (${"⭐".repeat(x.rating)})`).join("<br>")}
 
     <br>
@@ -236,8 +236,8 @@ function showSaved(){
     ${savedTeams.map((t,i)=>`
       <div class="saved-card">
         <b>${t.name}</b><br><br>
-        🔵 (${t.sa}): ${t.a.map(x=>x.name).join(", ")}<br>
-        🔴 (${t.sb}): ${t.b.map(x=>x.name).join(", ")}<br><br>
+        🏟️ ملعب (${t.sa}): ${t.a.map(x=>x.name).join(", ")}<br>
+        ⚽ كره (${t.sb}): ${t.b.map(x=>x.name).join(", ")}<br><br>
         <button onclick="delTeam(${i})">❌ حذف</button>
       </div>
     `).join("")}
