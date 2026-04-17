@@ -169,7 +169,7 @@ function split(){
     else{b.push(p);sb+=p.rating}
   });
 
-  lastTeams = {a,b};
+  lastTeams = {a,b,sa,sb};
 
   showResult();
 }
@@ -178,11 +178,11 @@ function showResult(){
   document.getElementById("app").innerHTML = `
     <button onclick="showMenu()">⬅ رجوع</button>
 
-    <h3>فريق A</h3>
-    ${lastTeams.a.map(x=>x.name).join("<br>")}
+    <h3>🔵 فريق A (المجموع: ${lastTeams.sa})</h3>
+    ${lastTeams.a.map(x=>`${x.name} (${"⭐".repeat(x.rating)})`).join("<br>")}
 
-    <h3>فريق B</h3>
-    ${lastTeams.b.map(x=>x.name).join("<br>")}
+    <h3>🔴 فريق B (المجموع: ${lastTeams.sb})</h3>
+    ${lastTeams.b.map(x=>`${x.name} (${"⭐".repeat(x.rating)})`).join("<br>")}
 
     <br>
     <input id="teamName" placeholder="اسم التقسيمة">
@@ -202,7 +202,9 @@ function saveTeams(){
   let copy = {
     name,
     a: [...lastTeams.a],
-    b: [...lastTeams.b]
+    b: [...lastTeams.b],
+    sa: lastTeams.sa,
+    sb: lastTeams.sb
   };
 
   savedTeams.push(copy);
@@ -219,8 +221,13 @@ function showSaved(){
     ${savedTeams.map((t,i)=>`
       <div class="saved-card">
         <b>${t.name}</b><br><br>
-        🔵 فريق A: ${t.a.map(x=>x.name).join(", ")}<br>
-        🔴 فريق B: ${t.b.map(x=>x.name).join(", ")}<br><br>
+
+        🔵 فريق A (${t.sa}):<br>
+        ${t.a.map(x=>`${x.name} (${"⭐".repeat(x.rating)})`).join("، ")}<br><br>
+
+        🔴 فريق B (${t.sb}):<br>
+        ${t.b.map(x=>`${x.name} (${"⭐".repeat(x.rating)})`).join("، ")}<br><br>
+
         <button onclick="delTeam(${i})">❌ حذف</button>
       </div>
     `).join("")}
