@@ -30,7 +30,6 @@ button {
   border-radius: 10px;
   border: none;
   font-size: 16px;
-  cursor: pointer;
 }
 
 .player {
@@ -40,11 +39,6 @@ button {
   padding: 10px;
   margin: 5px;
   border-radius: 5px;
-}
-
-.player div {
-  display: flex;
-  gap: 5px;
 }
 
 .small-btn {
@@ -95,8 +89,8 @@ function showMenu() {
 function newGame() {
   document.getElementById("app").innerHTML = `
     <button onclick="showMenu()">⬅ رجوع</button>
+
     <input id="name" placeholder="اسم اللاعب">
-    
     <select id="rating">
       <option value="1">⭐</option>
       <option value="2">⭐⭐</option>
@@ -109,7 +103,8 @@ function newGame() {
 
     <div id="list"></div>
 
-    <button onclick="split()">⚽ تقسيم</button>
+    <button onclick="balancedSplit()">🎯 أفضل توازن</button>
+    <button onclick="randomSplit()">🎲 عشوائي</button>
   `;
   renderPlayers();
 }
@@ -158,8 +153,9 @@ function renderPlayers() {
 }
 
 let lastTeams = null;
+let lastMode = "balanced";
 
-function split(){
+function balancedSplit(){
   let a=[],b=[],sa=0,sb=0;
 
   let sorted=[...players].sort((x,y)=>y.rating-x.rating);
@@ -170,7 +166,23 @@ function split(){
   });
 
   lastTeams = {a,b,sa,sb};
+  lastMode = "balanced";
+  showResult();
+}
 
+function randomSplit(){
+  let shuffled=[...players].sort(()=>Math.random()-0.5);
+
+  let half=Math.ceil(shuffled.length/2);
+
+  let a=shuffled.slice(0,half);
+  let b=shuffled.slice(half);
+
+  let sa=a.reduce((s,p)=>s+p.rating,0);
+  let sb=b.reduce((s,p)=>s+p.rating,0);
+
+  lastTeams = {a,b,sa,sb};
+  lastMode = "random";
   showResult();
 }
 
@@ -178,39 +190,37 @@ function showResult(){
   document.getElementById("app").innerHTML = `
     <button onclick="showMenu()">⬅ رجوع</button>
 
-    <h3>🔵 فريق A (المجموع: ${lastTeams.sa})</h3>
+    <h3>🔵 فريق A (${lastTeams.sa})</h3>
     ${lastTeams.a.map(x=>`${x.name} (${"⭐".repeat(x.rating)})`).join("<br>")}
 
-    <h3>🔴 فريق B (المجموع: ${lastTeams.sb})</h3>
+    <h3>🔴 فريق B (${lastTeams.sb})</h3>
     ${lastTeams.b.map(x=>`${x.name} (${"⭐".repeat(x.rating)})`).join("<br>")}
 
     <br>
     <input id="teamName" placeholder="اسم التقسيمة">
 
     <button onclick="saveTeams()">💾 حفظ</button>
+    <button onclick="reroll()">🔄 إعادة</button>
   `;
 }
 
+function reroll(){
+  if(lastMode==="balanced") balancedSplit();
+  else randomSplit();
+}
+
 function saveTeams(){
-  let name = document.getElementById("teamName").value;
+  let name=document.getElementById("teamName").value;
 
-  if(!name){
-    alert("حط اسم للتقسيمة 👌");
-    return;
-  }
+  if(!name){ alert("حط اسم 👌"); return;}
 
-  let copy = {
+  savedTeams.push({
     name,
-    a: [...lastTeams.a],
-    b: [...lastTeams.b],
-    sa: lastTeams.sa,
-    sb: lastTeams.sb
-  };
+    ...lastTeams
+  });
 
-  savedTeams.push(copy);
   saveAll();
-
-  alert("تم الحفظ 👍");
+  alert("تم الحفظ 🔥");
 }
 
 function showSaved(){
@@ -221,13 +231,8 @@ function showSaved(){
     ${savedTeams.map((t,i)=>`
       <div class="saved-card">
         <b>${t.name}</b><br><br>
-
-        🔵 فريق A (${t.sa}):<br>
-        ${t.a.map(x=>`${x.name} (${"⭐".repeat(x.rating)})`).join("، ")}<br><br>
-
-        🔴 فريق B (${t.sb}):<br>
-        ${t.b.map(x=>`${x.name} (${"⭐".repeat(x.rating)})`).join("، ")}<br><br>
-
+        🔵 (${t.sa}): ${t.a.map(x=>x.name).join(", ")}<br>
+        🔴 (${t.sb}): ${t.b.map(x=>x.name).join(", ")}<br><br>
         <button onclick="delTeam(${i})">❌ حذف</button>
       </div>
     `).join("")}
@@ -244,19 +249,14 @@ function settings(){
   document.getElementById("app").innerHTML = `
     <button onclick="showMenu()">⬅ رجوع</button>
     <h3>الإعدادات</h3>
-    <button onclick="toggleDark()">🌙 / ☀️ تغيير الوضع</button>
+    <button onclick="toggleDark()">🌙 / ☀️</button>
   `;
 }
 
 function toggleDark(){
-  darkMode = !darkMode;
-  localStorage.setItem("dark", darkMode);
-
-  if(darkMode){
-    document.body.classList.add("dark");
-  } else {
-    document.body.classList.remove("dark");
-  }
+  darkMode=!darkMode;
+  localStorage.setItem("dark",darkMode);
+  document.body.classList.toggle("dark");
 }
 
 showMenu();
