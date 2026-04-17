@@ -2,27 +2,47 @@
 <html lang="ar">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>تقسيم الفرق</title>
+
 <style>
 body {
   font-family: Arial;
   direction: rtl;
   text-align: center;
   background: #f5f5f5;
+  margin: 0;
 }
 
 .container {
   background: white;
-  padding: 20px;
-  margin: 30px auto;
-  width: 300px;
+  padding: 15px;
+  margin: 10px;
   border-radius: 10px;
 }
 
+h2 {
+  font-size: 22px;
+}
+
 input, select, button {
-  margin: 5px;
-  padding: 8px;
-  width: 90%;
+  margin: 5px 0;
+  padding: 12px;
+  width: 100%;
+  font-size: 16px;
+  border-radius: 8px;
+}
+
+button {
+  border: none;
+  background: #007bff;
+  color: white;
+}
+
+.delete {
+  background: red;
+  padding: 5px 10px;
+  font-size: 14px;
 }
 
 .player {
@@ -30,31 +50,29 @@ input, select, button {
   justify-content: space-between;
   background: #eee;
   margin: 5px 0;
-  padding: 5px;
+  padding: 10px;
   border-radius: 5px;
   align-items: center;
-}
-
-.delete {
-  background: red;
-  color: white;
-  border: none;
-  cursor: pointer;
-  padding: 5px;
-  border-radius: 5px;
+  font-size: 16px;
 }
 
 .teams {
   display: flex;
-  justify-content: space-around;
-  margin-top: 20px;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 15px;
 }
 
 .team {
   background: #ddd;
   padding: 10px;
-  width: 45%;
   border-radius: 10px;
+}
+
+@media (min-width: 600px) {
+  .teams {
+    flex-direction: row;
+  }
 }
 </style>
 </head>
@@ -74,11 +92,12 @@ input, select, button {
     <option value="5">⭐⭐⭐⭐⭐</option>
   </select>
 
-  <button onclick="addPlayer()">إضافة لاعب</button>
+  <button onclick="addPlayer()">➕ إضافة لاعب</button>
 
   <div id="players"></div>
 
-  <button onclick="divideTeams()">قسّم الفرق</button>
+  <button onclick="divideTeams()">⚽ تقسيم الفرق</button>
+  <button onclick="shuffleTeams()">🔄 إعادة تقسيم</button>
 
   <div class="teams">
     <div class="team">
@@ -130,10 +149,24 @@ function displayPlayers() {
 }
 
 function divideTeams() {
+  splitTeams(false);
+}
+
+function shuffleTeams() {
+  splitTeams(true);
+}
+
+function splitTeams(randomize) {
   let teamA = [];
   let teamB = [];
 
-  let sorted = [...players].sort((a, b) => b.rating - a.rating);
+  let sorted = [...players];
+
+  if (randomize) {
+    sorted.sort(() => Math.random() - 0.5);
+  } else {
+    sorted.sort((a, b) => b.rating - a.rating);
+  }
 
   let scoreA = 0;
   let scoreB = 0;
