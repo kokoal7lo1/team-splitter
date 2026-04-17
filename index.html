@@ -158,15 +158,20 @@ let lastMode = "balanced";
 function balancedSplit(){
   let a=[],b=[],sa=0,sb=0;
 
-  let sorted=[...players].sort((x,y)=>y.rating-x.rating);
+  // نخلط اللاعبين أول (عشان الرول يشتغل)
+  let shuffled = [...players].sort(() => Math.random() - 0.5);
 
-  sorted.forEach(p=>{
+  // بعدين نرتب حسب التقييم
+  shuffled.sort((x,y)=>y.rating-x.rating);
+
+  shuffled.forEach(p=>{
     if(sa<=sb){a.push(p);sa+=p.rating}
     else{b.push(p);sb+=p.rating}
   });
 
   lastTeams = {a,b,sa,sb};
   lastMode = "balanced";
+
   showResult();
 }
 
