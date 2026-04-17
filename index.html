@@ -37,12 +37,7 @@ button {
   border: none;
   background: #007bff;
   color: white;
-}
-
-.delete {
-  background: red;
-  padding: 5px 10px;
-  font-size: 14px;
+  cursor: pointer;
 }
 
 .player {
@@ -54,6 +49,21 @@ button {
   border-radius: 5px;
   align-items: center;
   font-size: 16px;
+}
+
+.player div {
+  display: flex;
+  gap: 5px;
+}
+
+.player button {
+  padding: 5px 8px;
+  font-size: 14px;
+  width: auto;
+}
+
+.delete {
+  background: red;
 }
 
 .teams {
@@ -134,6 +144,15 @@ function deletePlayer(index) {
   displayPlayers();
 }
 
+function editPlayer(index) {
+  let newRating = prompt("حط التقييم الجديد (1 إلى 5):", players[index].rating);
+
+  if (newRating >= 1 && newRating <= 5) {
+    players[index].rating = parseInt(newRating);
+    displayPlayers();
+  }
+}
+
 function displayPlayers() {
   let list = document.getElementById("players");
   list.innerHTML = "";
@@ -141,8 +160,11 @@ function displayPlayers() {
   players.forEach((p, index) => {
     list.innerHTML += `
       <div class="player">
-        ${p.name} - ${p.rating}⭐
-        <button class="delete" onclick="deletePlayer(${index})">❌</button>
+        <span>${p.name} - ${p.rating}⭐</span>
+        <div>
+          <button onclick="editPlayer(${index})">✏️</button>
+          <button class="delete" onclick="deletePlayer(${index})">❌</button>
+        </div>
       </div>
     `;
   });
