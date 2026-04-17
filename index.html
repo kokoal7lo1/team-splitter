@@ -56,6 +56,14 @@ button {
   background: red;
   color: white;
 }
+
+.saved-card {
+  background: #ddd;
+  padding: 15px;
+  margin: 10px 0;
+  border-radius: 12px;
+  text-align: right;
+}
 </style>
 </head>
 
@@ -70,7 +78,7 @@ let darkMode = localStorage.getItem("dark") === "true";
 
 if (darkMode) document.body.classList.add("dark");
 
-function save() {
+function saveAll(){
   localStorage.setItem("players", JSON.stringify(players));
   localStorage.setItem("teams", JSON.stringify(savedTeams));
 }
@@ -114,22 +122,22 @@ function add() {
 
   players.push({name, rating});
   document.getElementById("name").value = "";
-  save();
+  saveAll();
   renderPlayers();
 }
 
 function remove(i){
   players.splice(i,1);
-  save();
+  saveAll();
   renderPlayers();
 }
 
 function editPlayer(i){
-  let newRating = prompt("حط تقييم جديد من 1 إلى 5:", players[i].rating);
+  let newRating = prompt("تقييم جديد (1-5):", players[i].rating);
 
   if(newRating >=1 && newRating <=5){
     players[i].rating = parseInt(newRating);
-    save();
+    saveAll();
     renderPlayers();
   }
 }
@@ -154,9 +162,9 @@ let lastTeams = null;
 function split(){
   let a=[],b=[],sa=0,sb=0;
 
-  let shuffled = [...players].sort(() => Math.random() - 0.5);
+  let sorted=[...players].sort((x,y)=>y.rating-x.rating);
 
-  shuffled.forEach(p=>{
+  sorted.forEach(p=>{
     if(sa<=sb){a.push(p);sa+=p.rating}
     else{b.push(p);sb+=p.rating}
   });
@@ -177,9 +185,30 @@ function showResult(){
     ${lastTeams.b.map(x=>x.name).join("<br>")}
 
     <br>
+    <input id="teamName" placeholder="اسم التقسيمة">
+
     <button onclick="saveTeams()">💾 حفظ</button>
-    <button onclick="split()">🔄 إعادة تقسيم</button>
   `;
+}
+
+function saveTeams(){
+  let name = document.getElementById("teamName").value;
+
+  if(!name){
+    alert("حط اسم للتقسيمة 👌");
+    return;
+  }
+
+  let copy = {
+    name,
+    a: [...lastTeams.a],
+    b: [...lastTeams.b]
+  };
+
+  savedTeams.push(copy);
+  saveAll();
+
+  alert("تم الحفظ 👍");
 }
 
 function showSaved(){
@@ -187,35 +216,20 @@ function showSaved(){
     <button onclick="showMenu()">⬅ رجوع</button>
     <h3>📂 تقسيماتك</h3>
 
-    ${savedTeams.length === 0 ? 
-      "<p>ما عندك تقسيمات للحين 😅</p>" 
-      : 
-      savedTeams.map((t,i)=>`
-        <div class="saved-card">
-
-          <div class="saved-title">⚽ تقسيمة ${i+1}</div>
-
-          <div class="saved-team">
-            🔵 فريق A:<br>
-            ${t.a.map(x=>x.name).join("، ")}
-          </div>
-
-          <div class="saved-team">
-            🔴 فريق B:<br>
-            ${t.b.map(x=>x.name).join("، ")}
-          </div>
-
-          <button class="delete-btn" onclick="delTeam(${i})">❌ حذف التقسيمة</button>
-
-        </div>
-      `).join("")
-    }
+    ${savedTeams.map((t,i)=>`
+      <div class="saved-card">
+        <b>${t.name}</b><br><br>
+        🔵 فريق A: ${t.a.map(x=>x.name).join(", ")}<br>
+        🔴 فريق B: ${t.b.map(x=>x.name).join(", ")}<br><br>
+        <button onclick="delTeam(${i})">❌ حذف</button>
+      </div>
+    `).join("")}
   `;
 }
 
 function delTeam(i){
   savedTeams.splice(i,1);
-  save();
+  saveAll();
   showSaved();
 }
 
