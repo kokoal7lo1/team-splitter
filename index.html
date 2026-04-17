@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+<meta charset="UTF-8">
+<title>تقسيم الفرق</title>
+<style>
+body {
+  font-family: Arial;
+  direction: rtl;
+  text-align: center;
+  background: #f5f5f5;
+}
+
+.container {
+  background: white;
+  padding: 20px;
+  margin: 30px auto;
+  width: 300px;
+  border-radius: 10px;
+}
+
+input, select, button {
+  margin: 5px;
+  padding: 8px;
+  width: 90%;
+}
+
+.player {
+  display: flex;
+  justify-content: space-between;
+  background: #eee;
+  margin: 5px 0;
+  padding: 5px;
+  border-radius: 5px;
+}
+
+.teams {
+  display: flex;
+  justify-content: space-around;
+  margin-top: 20px;
+}
+
+.team {
+  background: #ddd;
+  padding: 10px;
+  width: 45%;
+  border-radius: 10px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+  <h2>تقسيم الفرق ⚽</h2>
+
+  <input type="text" id="name" placeholder="اسم اللاعب">
+  
+  <select id="rating">
+    <option value="1">⭐</option>
+    <option value="2">⭐⭐</option>
+    <option value="3">⭐⭐⭐</option>
+    <option value="4">⭐⭐⭐⭐</option>
+    <option value="5">⭐⭐⭐⭐⭐</option>
+  </select>
+
+  <button onclick="addPlayer()">إضافة لاعب</button>
+
+  <div id="players"></div>
+
+  <button onclick="divideTeams()">قسّم الفرق</button>
+
+  <div class="teams">
+    <div class="team">
+      <h3>فريق A</h3>
+      <div id="teamA"></div>
+      <p id="scoreA"></p>
+    </div>
+
+    <div class="team">
+      <h3>فريق B</h3>
+      <div id="teamB"></div>
+      <p id="scoreB"></p>
+    </div>
+  </div>
+</div>
+
+<script>
+let players = [];
+
+function addPlayer() {
+  let name = document.getElementById("name").value;
+  let rating = parseInt(document.getElementById("rating").value);
+
+  if (!name) return;
+
+  players.push({ name, rating });
+  document.getElementById("name").value = "";
+
+  displayPlayers();
+}
+
+function displayPlayers() {
+  let list = document.getElementById("players");
+  list.innerHTML = "";
+
+  players.forEach(p => {
+    list.innerHTML += `<div class="player">${p.name} - ${p.rating}⭐</div>`;
+  });
+}
+
+function divideTeams() {
+  let teamA = [];
+  let teamB = [];
+
+  let sorted = [...players].sort((a, b) => b.rating - a.rating);
+
+  let scoreA = 0;
+  let scoreB = 0;
+
+  sorted.forEach(player => {
+    if (scoreA <= scoreB) {
+      teamA.push(player);
+      scoreA += player.rating;
+    } else {
+      teamB.push(player);
+      scoreB += player.rating;
+    }
+  });
+
+  document.getElementById("teamA").innerHTML =
+    teamA.map(p => p.name).join("<br>");
+  document.getElementById("teamB").innerHTML =
+    teamB.map(p => p.name).join("<br>");
+
+  document.getElementById("scoreA").innerText = "المجموع: " + scoreA;
+  document.getElementById("scoreB").innerText = "المجموع: " + scoreB;
+}
+</script>
+
+</body>
+</html>
