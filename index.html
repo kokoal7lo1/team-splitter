@@ -77,15 +77,17 @@ function saveAll(){
   localStorage.setItem("teams", JSON.stringify(savedTeams));
 }
 
+/* ================== MENU ================== */
 function showMenu() {
   document.getElementById("app").innerHTML = `
     <h2>⚽ كوكو للتقسيم</h2>
-    <button onclick="newGame()">تقسيمة يديدة</button>
-    <button onclick="showSaved()">تقسيماتك</button>
-    <button onclick="settings()">الإعدادات</button>
+    <button onclick="newGame()">⚽ تقسيمات</button>
+    <button onclick="mafiaMenu()">🕵️ مافيا</button>
+    <button onclick="settings()">⚙️ الإعدادات</button>
   `;
 }
 
+/* ================== تقسيمات (ما لمسناها) ================== */
 function newGame() {
   document.getElementById("app").innerHTML = `
     <button onclick="showMenu()">⬅ رجوع</button>
@@ -158,10 +160,7 @@ let lastMode = "balanced";
 function balancedSplit(){
   let a=[],b=[],sa=0,sb=0;
 
-  // نخلط اللاعبين أول (عشان الرول يشتغل)
   let shuffled = [...players].sort(() => Math.random() - 0.5);
-
-  // بعدين نرتب حسب التقييم
   shuffled.sort((x,y)=>y.rating-x.rating);
 
   shuffled.forEach(p=>{
@@ -171,7 +170,6 @@ function balancedSplit(){
 
   lastTeams = {a,b,sa,sb};
   lastMode = "balanced";
-
   showResult();
 }
 
@@ -216,14 +214,9 @@ function reroll(){
 
 function saveTeams(){
   let name=document.getElementById("teamName").value;
-
   if(!name){ alert("حط اسم 👌"); return;}
 
-  savedTeams.push({
-    name,
-    ...lastTeams
-  });
-
+  savedTeams.push({name,...lastTeams});
   saveAll();
   alert("تم الحفظ 🔥");
 }
@@ -236,8 +229,8 @@ function showSaved(){
     ${savedTeams.map((t,i)=>`
       <div class="saved-card">
         <b>${t.name}</b><br><br>
-        🏟️ ملعب (${t.sa}): ${t.a.map(x=>x.name).join(", ")}<br>
-        ⚽ كره (${t.sb}): ${t.b.map(x=>x.name).join(", ")}<br><br>
+        🏟️ (${t.sa}): ${t.a.map(x=>x.name).join(", ")}<br>
+        ⚽ (${t.sb}): ${t.b.map(x=>x.name).join(", ")}<br><br>
         <button onclick="delTeam(${i})">❌ حذف</button>
       </div>
     `).join("")}
@@ -250,6 +243,42 @@ function delTeam(i){
   showSaved();
 }
 
+/* ================== مافيا ================== */
+function mafiaMenu(){
+  document.getElementById("app").innerHTML = `
+    <button onclick="showMenu()">⬅ رجوع</button>
+    <h3>🕵️ لعبة مافيا</h3>
+    <button onclick="startMafia()">🎭 توزيع الأدوار</button>
+  `;
+}
+
+function startMafia(){
+  if(players.length < 4){
+    alert("لازم 4 لاعبين على الأقل 😅");
+    return;
+  }
+
+  let roles=[];
+  let mafiaCount=Math.floor(players.length/4);
+
+  for(let i=0;i<mafiaCount;i++) roles.push("😈 مافيا");
+  roles.push("🩺 دكتور");
+  roles.push("👮 شرطي");
+
+  while(roles.length<players.length){
+    roles.push("👨‍🌾 مدني");
+  }
+
+  roles=roles.sort(()=>Math.random()-0.5);
+
+  document.getElementById("app").innerHTML = `
+    <button onclick="showMenu()">⬅ رجوع</button>
+    <h3>🎭 الأدوار</h3>
+    ${players.map((p,i)=>`${p.name} → ${roles[i]}`).join("<br>")}
+  `;
+}
+
+/* ================== إعدادات ================== */
 function settings(){
   document.getElementById("app").innerHTML = `
     <button onclick="showMenu()">⬅ رجوع</button>
