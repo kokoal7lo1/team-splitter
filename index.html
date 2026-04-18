@@ -10,10 +10,37 @@ body {font-family: Arial; margin:0; text-align:center; direction:rtl; background
 .dark {background:#111; color:white;}
 .container {padding:20px;}
 button {padding:12px; margin:5px; width:90%; border-radius:10px; border:none; font-size:16px;}
-.player {display:flex; justify-content:space-between; background:#ddd; padding:10px; margin:5px; border-radius:5px;}
+
+.player {
+  display:flex; justify-content:space-between;
+  background:#ddd; padding:10px; margin:5px; border-radius:5px;
+}
+
 .small-btn {padding:5px 8px; width:auto;}
 .delete {background:red; color:white;}
-.saved-card {background:#ddd; padding:15px; margin:10px 0; border-radius:12px; text-align:right;}
+
+.saved-card {
+  background:#ddd; padding:15px; margin:10px 0;
+  border-radius:12px; text-align:right;
+}
+
+/* 🔥 ستايل المافيا */
+.role-box {
+  padding:15px;
+  margin:8px 0;
+  border-radius:10px;
+  color:white;
+  font-weight:bold;
+}
+
+.mafia { background:#e74c3c; }   /* أحمر */
+.sheeb { background:#3498db; }   /* أزرق */
+.doctor { background:#2ecc71; }  /* أخضر */
+.adami { 
+  background:#ccc; 
+  color:black; 
+  border-radius:20px;
+}
 </style>
 </head>
 
@@ -34,7 +61,7 @@ function saveAll(){
   localStorage.setItem("mafiaPlayers", JSON.stringify(mafiaPlayers));
 }
 
-/* ================= MENU ================= */
+/* ===== MENU ===== */
 function showMenu(){
   document.getElementById("app").innerHTML = `
     <h2>⚽ كوكو للتقسيم</h2>
@@ -44,7 +71,7 @@ function showMenu(){
   `;
 }
 
-/* ================= تقسيمات ================= */
+/* ===== تقسيمات ===== */
 function teamsMenu(){
   document.getElementById("app").innerHTML = `
     <button onclick="showMenu()">⬅ رجوع</button>
@@ -171,7 +198,7 @@ function showSaved(){
 
 function delTeam(i){ savedTeams.splice(i,1); saveAll(); showSaved(); }
 
-/* ================= مافيا ================= */
+/* ===== مافيا ===== */
 function mafiaMenu(){
   document.getElementById("app").innerHTML=`
     <button onclick="showMenu()">⬅ رجوع</button>
@@ -234,11 +261,22 @@ function startMafia(){
   document.getElementById("app").innerHTML=`
     <button onclick="mafiaMenu()">⬅ رجوع</button>
     <h3>🎭 الأدوار</h3>
-    ${mafiaPlayers.map((p,i)=>`${p} → ${roles[i]}`).join("<br>")}
+
+    ${mafiaPlayers.map((p,i)=>{
+      let role = roles[i];
+      let cls = "";
+
+      if(role==="مافيا") cls="mafia";
+      else if(role==="شايب") cls="sheeb";
+      else if(role==="دكتور") cls="doctor";
+      else cls="adami";
+
+      return `<div class="role-box ${cls}">${p} → ${role}</div>`;
+    }).join("")}
   `;
 }
 
-/* ================= إعدادات ================= */
+/* ===== إعدادات ===== */
 function settings(){
   document.getElementById("app").innerHTML=`
     <button onclick="showMenu()">⬅ رجوع</button>
