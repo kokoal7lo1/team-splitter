@@ -6,68 +6,24 @@
 <title>كوكو للتقسيم</title>
 
 <style>
-body {
-  font-family: Arial;
-  margin: 0;
-  text-align: center;
-  direction: rtl;
-  background: #f5f5f5;
-}
-
-.dark {
-  background: #111;
-  color: white;
-}
-
-.container {
-  padding: 20px;
-}
-
-button {
-  padding: 12px;
-  margin: 5px;
-  width: 90%;
-  border-radius: 10px;
-  border: none;
-  font-size: 16px;
-}
-
-.player {
-  display: flex;
-  justify-content: space-between;
-  background: #ddd;
-  padding: 10px;
-  margin: 5px;
-  border-radius: 5px;
-}
-
-.small-btn {
-  padding: 5px 8px;
-  width: auto;
-}
-
-.delete {
-  background: red;
-  color: white;
-}
-
-.saved-card {
-  background: #ddd;
-  padding: 15px;
-  margin: 10px 0;
-  border-radius: 12px;
-  text-align: right;
-}
+body {font-family: Arial; margin:0; text-align:center; direction:rtl; background:#f5f5f5;}
+.dark {background:#111; color:white;}
+.container {padding:20px;}
+button {padding:12px; margin:5px; width:90%; border-radius:10px; border:none; font-size:16px;}
+.player {display:flex; justify-content:space-between; background:#ddd; padding:10px; margin:5px; border-radius:5px;}
+.small-btn {padding:5px 8px; width:auto;}
+.delete {background:red; color:white;}
+.saved-card {background:#ddd; padding:15px; margin:10px 0; border-radius:12px; text-align:right;}
 </style>
 </head>
 
 <body>
-
 <div id="app" class="container"></div>
 
 <script>
 let players = JSON.parse(localStorage.getItem("players") || "[]");
 let savedTeams = JSON.parse(localStorage.getItem("teams") || "[]");
+let mafiaPlayers = JSON.parse(localStorage.getItem("mafiaPlayers") || "[]");
 let darkMode = localStorage.getItem("dark") === "true";
 
 if (darkMode) document.body.classList.add("dark");
@@ -75,22 +31,31 @@ if (darkMode) document.body.classList.add("dark");
 function saveAll(){
   localStorage.setItem("players", JSON.stringify(players));
   localStorage.setItem("teams", JSON.stringify(savedTeams));
+  localStorage.setItem("mafiaPlayers", JSON.stringify(mafiaPlayers));
 }
 
-/* ================== MENU ================== */
-function showMenu() {
+/* ================= MENU ================= */
+function showMenu(){
   document.getElementById("app").innerHTML = `
     <h2>⚽ كوكو للتقسيم</h2>
-    <button onclick="newGame()">⚽ تقسيمات</button>
+    <button onclick="teamsMenu()">⚽ تقسيمات</button>
     <button onclick="mafiaMenu()">🕵️ مافيا</button>
     <button onclick="settings()">⚙️ الإعدادات</button>
   `;
 }
 
-/* ================== تقسيمات (ما لمسناها) ================== */
-function newGame() {
+/* ================= تقسيمات ================= */
+function teamsMenu(){
   document.getElementById("app").innerHTML = `
     <button onclick="showMenu()">⬅ رجوع</button>
+    <button onclick="newGame()">تقسيمة يديدة</button>
+    <button onclick="showSaved()">تقسيماتك</button>
+  `;
+}
+
+function newGame(){
+  document.getElementById("app").innerHTML = `
+    <button onclick="teamsMenu()">⬅ رجوع</button>
 
     <input id="name" placeholder="اسم اللاعب">
     <select id="rating">
@@ -102,48 +67,35 @@ function newGame() {
     </select>
 
     <button onclick="add()">➕ إضافة</button>
-
     <div id="list"></div>
 
-    <button onclick="balancedSplit()">🎯 أفضل توازن</button>
+    <button onclick="balancedSplit()">🎯 ذكي</button>
     <button onclick="randomSplit()">🎲 عشوائي</button>
   `;
   renderPlayers();
 }
 
-function add() {
-  let name = document.getElementById("name").value;
-  let rating = parseInt(document.getElementById("rating").value);
-
-  if (!name) return;
-
-  players.push({name, rating});
-  document.getElementById("name").value = "";
+function add(){
+  let name=document.getElementById("name").value;
+  let rating=parseInt(document.getElementById("rating").value);
+  if(!name) return;
+  players.push({name,rating});
+  document.getElementById("name").value="";
   saveAll();
   renderPlayers();
 }
 
-function remove(i){
-  players.splice(i,1);
-  saveAll();
-  renderPlayers();
-}
+function remove(i){ players.splice(i,1); saveAll(); renderPlayers(); }
 
 function editPlayer(i){
-  let newRating = prompt("تقييم جديد (1-5):", players[i].rating);
-
-  if(newRating >=1 && newRating <=5){
-    players[i].rating = parseInt(newRating);
-    saveAll();
-    renderPlayers();
-  }
+  let r=prompt("تقييم (1-5)", players[i].rating);
+  if(r>=1 && r<=5){ players[i].rating=parseInt(r); saveAll(); renderPlayers(); }
 }
 
-function renderPlayers() {
-  let list = document.getElementById("list");
-  if (!list) return;
-
-  list.innerHTML = players.map((p,i)=>`
+function renderPlayers(){
+  let list=document.getElementById("list");
+  if(!list) return;
+  list.innerHTML=players.map((p,i)=>`
     <div class="player">
       ${p.name} (${"⭐".repeat(p.rating)})
       <div>
@@ -154,44 +106,30 @@ function renderPlayers() {
   `).join("");
 }
 
-let lastTeams = null;
-let lastMode = "balanced";
+let lastTeams=null, lastMode="balanced";
 
 function balancedSplit(){
   let a=[],b=[],sa=0,sb=0;
-
-  let shuffled = [...players].sort(() => Math.random() - 0.5);
+  let shuffled=[...players].sort(()=>Math.random()-0.5);
   shuffled.sort((x,y)=>y.rating-x.rating);
-
   shuffled.forEach(p=>{
-    if(sa<=sb){a.push(p);sa+=p.rating}
-    else{b.push(p);sb+=p.rating}
+    if(sa<=sb){a.push(p);sa+=p.rating}else{b.push(p);sb+=p.rating}
   });
-
-  lastTeams = {a,b,sa,sb};
-  lastMode = "balanced";
-  showResult();
+  lastTeams={a,b,sa,sb}; lastMode="balanced"; showResult();
 }
 
 function randomSplit(){
-  let shuffled=[...players].sort(()=>Math.random()-0.5);
-
-  let half=Math.ceil(shuffled.length/2);
-
-  let a=shuffled.slice(0,half);
-  let b=shuffled.slice(half);
-
+  let s=[...players].sort(()=>Math.random()-0.5);
+  let h=Math.ceil(s.length/2);
+  let a=s.slice(0,h), b=s.slice(h);
   let sa=a.reduce((s,p)=>s+p.rating,0);
   let sb=b.reduce((s,p)=>s+p.rating,0);
-
-  lastTeams = {a,b,sa,sb};
-  lastMode = "random";
-  showResult();
+  lastTeams={a,b,sa,sb}; lastMode="random"; showResult();
 }
 
 function showResult(){
-  document.getElementById("app").innerHTML = `
-    <button onclick="showMenu()">⬅ رجوع</button>
+  document.getElementById("app").innerHTML=`
+    <button onclick="teamsMenu()">⬅ رجوع</button>
 
     <h3>🏟️ ملعب (${lastTeams.sa})</h3>
     ${lastTeams.a.map(x=>`${x.name} (${"⭐".repeat(x.rating)})`).join("<br>")}
@@ -199,7 +137,6 @@ function showResult(){
     <h3>⚽ كره (${lastTeams.sb})</h3>
     ${lastTeams.b.map(x=>`${x.name} (${"⭐".repeat(x.rating)})`).join("<br>")}
 
-    <br>
     <input id="teamName" placeholder="اسم التقسيمة">
 
     <button onclick="saveTeams()">💾 حفظ</button>
@@ -207,96 +144,104 @@ function showResult(){
   `;
 }
 
-function reroll(){
-  if(lastMode==="balanced") balancedSplit();
-  else randomSplit();
-}
+function reroll(){ lastMode==="balanced"?balancedSplit():randomSplit(); }
 
 function saveTeams(){
   let name=document.getElementById("teamName").value;
-  if(!name){ alert("حط اسم 👌"); return;}
-
+  if(!name){alert("حط اسم");return;}
   savedTeams.push({name,...lastTeams});
   saveAll();
-  alert("تم الحفظ 🔥");
+  alert("تم الحفظ");
 }
 
 function showSaved(){
-  document.getElementById("app").innerHTML = `
-    <button onclick="showMenu()">⬅ رجوع</button>
+  document.getElementById("app").innerHTML=`
+    <button onclick="teamsMenu()">⬅ رجوع</button>
     <h3>📂 تقسيماتك</h3>
-
     ${savedTeams.map((t,i)=>`
       <div class="saved-card">
-        <b>${t.name}</b><br><br>
+        <b>${t.name}</b><br>
         🏟️ (${t.sa}): ${t.a.map(x=>x.name).join(", ")}<br>
-        ⚽ (${t.sb}): ${t.b.map(x=>x.name).join(", ")}<br><br>
+        ⚽ (${t.sb}): ${t.b.map(x=>x.name).join(", ")}<br>
         <button onclick="delTeam(${i})">❌ حذف</button>
       </div>
     `).join("")}
   `;
 }
 
-function delTeam(i){
-  savedTeams.splice(i,1);
-  saveAll();
-  showSaved();
+function delTeam(i){ savedTeams.splice(i,1); saveAll(); showSaved(); }
+
+/* ================= مافيا ================= */
+function mafiaMenu(){
+  document.getElementById("app").innerHTML=`
+    <button onclick="showMenu()">⬅ رجوع</button>
+
+    <h3>🕵️ مافيا</h3>
+
+    <input id="mname" placeholder="اسم اللاعب">
+    <button onclick="addMafia()">➕ إضافة</button>
+
+    <div id="mlist"></div>
+
+    <button onclick="startMafia()">🎭 توزيع</button>
+  `;
+  renderMafia();
 }
 
-/* ================== مافيا ================== */
-function mafiaMenu(){
-  document.getElementById("app").innerHTML = `
-    <button onclick="showMenu()">⬅ رجوع</button>
-    <h3>🕵️ لعبة مافيا</h3>
-    <button onclick="startMafia()">🎭 توزيع الأدوار</button>
-  `;
+function addMafia(){
+  let name=document.getElementById("mname").value;
+  if(!name) return;
+  mafiaPlayers.push(name);
+  document.getElementById("mname").value="";
+  saveAll();
+  renderMafia();
+}
+
+function removeMafia(i){
+  mafiaPlayers.splice(i,1);
+  saveAll();
+  renderMafia();
+}
+
+function renderMafia(){
+  let list=document.getElementById("mlist");
+  if(!list) return;
+
+  list.innerHTML = mafiaPlayers.map((p,i)=>`
+    <div class="player">
+      ${p}
+      <button class="small-btn delete" onclick="removeMafia(${i})">❌</button>
+    </div>
+  `).join("");
 }
 
 function startMafia(){
-  if(players.length < 4){
-    alert("لازم 4 لاعبين على الأقل 😅");
-    return;
+  if(mafiaPlayers.length<4){alert("لازم 4 لاعبين");return;}
+
+  let roles=[];
+  let mafiaCount=Math.floor(mafiaPlayers.length/4)||1;
+
+  for(let i=0;i<mafiaCount;i++) roles.push("مافيا");
+  roles.push("دكتور");
+  roles.push("شايب");
+
+  while(roles.length<mafiaPlayers.length){
+    roles.push("آدمي");
   }
 
-  let roles = [];
+  roles=roles.sort(()=>Math.random()-0.5);
 
-  // كل 4 لاعبين = 1 مافيا
-  let mafiaCount = Math.floor(players.length / 4);
-  if(mafiaCount === 0) mafiaCount = 1;
-
-  // 😈 مافيا
-  for(let i=0; i<mafiaCount; i++){
-    roles.push("😈 مافيا");
-  }
-
-  // الأدوار الخاصة
-  roles.push("🩺 دكتور");
-  roles.push("🧓 شايب");
-
-  // الباقي آدمي
-  while(roles.length < players.length){
-    roles.push("👨‍🌾 آدمي");
-  }
-
-  // خلط
-  roles = roles.sort(()=>Math.random()-0.5);
-
-  // عرض
-  document.getElementById("app").innerHTML = `
-    <button onclick="showMenu()">⬅ رجوع</button>
+  document.getElementById("app").innerHTML=`
+    <button onclick="mafiaMenu()">⬅ رجوع</button>
     <h3>🎭 الأدوار</h3>
-
-    ${players.map((p,i)=>`
-      <div>${p.name} → ${roles[i]}</div>
-    `).join("")}
+    ${mafiaPlayers.map((p,i)=>`${p} → ${roles[i]}`).join("<br>")}
   `;
 }
 
-/* ================== إعدادات ================== */
+/* ================= إعدادات ================= */
 function settings(){
-  document.getElementById("app").innerHTML = `
+  document.getElementById("app").innerHTML=`
     <button onclick="showMenu()">⬅ رجوع</button>
-    <h3>الإعدادات</h3>
     <button onclick="toggleDark()">🌙 / ☀️</button>
   `;
 }
@@ -309,6 +254,5 @@ function toggleDark(){
 
 showMenu();
 </script>
-
 </body>
 </html>
