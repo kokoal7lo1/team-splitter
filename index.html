@@ -258,23 +258,37 @@ function startMafia(){
     return;
   }
 
-  let roles=[];
-  let mafiaCount=Math.floor(players.length/4);
+  let roles = [];
 
-  for(let i=0;i<mafiaCount;i++) roles.push("😈 مافيا");
-  roles.push("🩺 دكتور");
-  roles.push("👮 شرطي");
+  // كل 4 لاعبين = 1 مافيا
+  let mafiaCount = Math.floor(players.length / 4);
+  if(mafiaCount === 0) mafiaCount = 1;
 
-  while(roles.length<players.length){
-    roles.push("👨‍🌾 مدني");
+  // 😈 مافيا
+  for(let i=0; i<mafiaCount; i++){
+    roles.push("😈 مافيا");
   }
 
-  roles=roles.sort(()=>Math.random()-0.5);
+  // الأدوار الخاصة
+  roles.push("🩺 دكتور");
+  roles.push("🧓 شايب");
 
+  // الباقي آدمي
+  while(roles.length < players.length){
+    roles.push("👨‍🌾 آدمي");
+  }
+
+  // خلط
+  roles = roles.sort(()=>Math.random()-0.5);
+
+  // عرض
   document.getElementById("app").innerHTML = `
     <button onclick="showMenu()">⬅ رجوع</button>
     <h3>🎭 الأدوار</h3>
-    ${players.map((p,i)=>`${p.name} → ${roles[i]}`).join("<br>")}
+
+    ${players.map((p,i)=>`
+      <div>${p.name} → ${roles[i]}</div>
+    `).join("")}
   `;
 }
 
