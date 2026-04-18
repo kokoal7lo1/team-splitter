@@ -33,9 +33,9 @@ button {padding:12px; margin:5px; width:90%; border-radius:10px; border:none; fo
   font-weight:bold;
 }
 
-.mafia { background:#e74c3c; }   /* أحمر */
-.sheeb { background:#3498db; }   /* أزرق */
-.doctor { background:#2ecc71; }  /* أخضر */
+.mafia { background:#e74c3c; }
+.sheeb { background:#3498db; }
+.doctor { background:#2ecc71; }
 .adami { 
   background:#ccc; 
   color:black; 
@@ -202,14 +202,10 @@ function delTeam(i){ savedTeams.splice(i,1); saveAll(); showSaved(); }
 function mafiaMenu(){
   document.getElementById("app").innerHTML=`
     <button onclick="showMenu()">⬅ رجوع</button>
-
     <h3>🕵️ مافيا</h3>
-
     <input id="mname" placeholder="اسم اللاعب">
     <button onclick="addMafia()">➕ إضافة</button>
-
     <div id="mlist"></div>
-
     <button onclick="startMafia()">🎭 توزيع</button>
   `;
   renderMafia();
@@ -233,7 +229,6 @@ function removeMafia(i){
 function renderMafia(){
   let list=document.getElementById("mlist");
   if(!list) return;
-
   list.innerHTML = mafiaPlayers.map((p,i)=>`
     <div class="player">
       ${p}
@@ -258,20 +253,17 @@ function startMafia(){
 
   roles=roles.sort(()=>Math.random()-0.5);
 
+  let combined = mafiaPlayers.map((p,i)=>({name:p, role:roles[i]}));
+
+  let order = {"مافيا":1,"شايب":2,"دكتور":3,"آدمي":4};
+  combined.sort((a,b)=>order[a.role]-order[b.role]);
+
   document.getElementById("app").innerHTML=`
     <button onclick="mafiaMenu()">⬅ رجوع</button>
     <h3>🎭 الأدوار</h3>
-
-    ${mafiaPlayers.map((p,i)=>{
-      let role = roles[i];
-      let cls = "";
-
-      if(role==="مافيا") cls="mafia";
-      else if(role==="شايب") cls="sheeb";
-      else if(role==="دكتور") cls="doctor";
-      else cls="adami";
-
-      return `<div class="role-box ${cls}">${p} → ${role}</div>`;
+    ${combined.map(x=>{
+      let cls = x.role==="مافيا"?"mafia":x.role==="شايب"?"sheeb":x.role==="دكتور"?"doctor":"adami";
+      return `<div class="role-box ${cls}">${x.name} → ${x.role}</div>`;
     }).join("")}
   `;
 }
